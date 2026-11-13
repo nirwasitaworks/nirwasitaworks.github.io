@@ -1021,4 +1021,45 @@ document.addEventListener('click',e=>{const p=e.target.closest&&e.target.closest
 document.addEventListener('keydown',e=>{const w=e.target.closest&&e.target.closest('.aud-w');if(!w||!/Arrow(Left|Right)/.test(e.key))return;const a=w.closest('.aud-c').querySelector('audio');a.currentTime=Math.max(0,Math.min(a.duration||0,a.currentTime+(e.key==='ArrowRight'?5:-5)));e.preventDefault()});
 ['play','pause','ended','timeupdate','loadedmetadata'].forEach(ev=>document.addEventListener(ev,e=>{const a=e.target;if(!a||a.tagName!=='AUDIO')return;const c=a.closest('.aud-c');if(!c)return;c.classList.toggle('on',!a.paused&&!a.ended);upd(c)},true))})();
 </script>
+<!-- deeplink: beri alamat sendiri untuk tiap kartu proyek -->
+<script>
+(function(){
+  function slug(s){
+    return (s||'').toLowerCase()
+      .replace(/[‘’“”'"]/g,'')
+      .replace(/&/g,' and ')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function tagCards(){
+    var seen={}, cards=document.querySelectorAll('#grid .card');
+    for(var i=0;i<cards.length;i++){
+      var t=cards[i].querySelector('.ttl');
+      if(!t) continue;
+      var s=slug(t.textContent);
+      if(!s) continue;
+      if(seen[s]){ seen[s]++; s=s+'-'+seen[s]; } else { seen[s]=1; }
+      cards[i].id=s;
+    }
+  }
+  function openFromHash(){
+    var h=(location.hash||'').replace(/^#/,'');
+    if(!h) return;
+    try{ h=decodeURIComponent(h); }catch(e){}
+    var c=document.getElementById(h);
+    if(!c||!c.classList||!c.classList.contains('card')) return;
+    var all=document.querySelector('#filters .fbtn[data-k="all"]');
+    if(all&&all.getAttribute('aria-pressed')!=='true') all.click();
+    var head=c.querySelector('.head');
+    if(head&&head.getAttribute('aria-expanded')!=='true') head.click();
+    setTimeout(function(){
+      var tgt=(getComputedStyle(c).display==='contents')?c.querySelector('.head'):c;
+      (tgt||c).scrollIntoView({behavior:'smooth',block:'start'});
+    },80);
+  }
+  function init(){ tagCards(); openFromHash(); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',init); } else { init(); }
+  window.addEventListener('hashchange',openFromHash);
+})();
+</script>
 </body></html>
